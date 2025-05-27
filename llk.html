@@ -1,0 +1,676 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>连连看游戏</title>
+<style>
+body {
+margin: 0;
+padding: 20px;
+font-family: 'Arial', sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.game-container {
+background: rgba(255, 255, 255, 0.95);
+border-radius: 20px;
+padding: 20px;
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+backdrop-filter: blur(10px);
+}
+.game-header {
+text-align: center;
+margin-bottom: 20px;
+}
+.game-title {
+color: #333;
+font-size: 2.5em;
+margin: 0;
+text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+.game-info {
+display: flex;
+justify-content: space-between;
+margin: 20px 0;
+font-size: 1.2em;
+font-weight: bold;
+color: #555;
+}
+.game-board {
+display: grid;
+grid-template-columns: repeat(8, 60px);
+grid-template-rows: repeat(6, 60px);
+gap: 5px;
+background: #f0f0f0;
+padding: 10px;
+border-radius: 15px;
+box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.tile {
+width: 60px;
+height: 60px;
+background: linear-gradient(145deg, #ffffff, #e6e6e6);
+border: 2px solid #ddd;
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+cursor: pointer;
+transition: all 0.1s ease;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+user-select: none;
+}
+.tile:hover {
+transform: translateY(-1px);
+box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+.tile.selected {
+background: linear-gradient(145deg, #ffd700, #ffed4e);
+border-color: #ff6b6b;
+transform: scale(1.05);
+box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+.tile.matched {
+animation: matchAnimation 0.15s ease-in-out;
+background: linear-gradient(145deg, #51cf66, #40c057);
+}
+.tile.empty {
+background: transparent;
+border: none;
+box-shadow: none;
+cursor: default;
+}
+@keyframes matchAnimation {
+0% { transform: scale(1); }
+50% { transform: scale(1.15) rotate(90deg); }
+100% { transform: scale(0); opacity: 0; }
+}
+@keyframes shuffleAnimation {
+0% { transform: scale(1) rotate(0deg); }
+50% { transform: scale(0.9) rotate(180deg); }
+100% { transform: scale(1) rotate(360deg); }
+}
+.tile.shuffling {
+animation: shuffleAnimation 0.3s ease-in-out;
+}
+.game-controls {
+text-align: center;
+margin-top: 20px;
+}
+.btn {
+background: linear-gradient(145deg, #4ecdc4, #44a08d);
+color: white;
+border: none;
+padding: 12px 24px;
+font-size: 16px;
+border-radius: 25px;
+cursor: pointer;
+margin: 0 10px;
+transition: all 0.15s ease;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.btn.help {
+background: linear-gradient(145deg, #ffa726, #ff9800);
+}
+.game-complete {
+text-align: center;
+background: linear-gradient(145deg, #51cf66, #40c057);
+color: white;
+padding: 20px;
+border-radius: 15px;
+margin-top: 20px;
+display: none;
+animation: celebration 0.5s ease-in-out;
+}
+@keyframes celebration {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.05); }
+}
+.notification {
+position: fixed;
+top: 20px;
+right: 20px;
+padding: 15px 20px;
+background: linear-gradient(145deg, #ff6b6b, #e55656);
+color: white;
+border-radius: 10px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+transform: translateX(400px);
+transition: transform 0.2s ease;
+z-index: 1000;
+}
+.notification.show {
+transform: translateX(0);
+}
+.notification.success {
+background: linear-gradient(145deg, #51cf66, #40c057);
+}
+.notification.warning {
+background: linear-gradient(145deg, #ffa726, #ff9800);
+}
+/* 弹窗样式 */
+.modal {
+display: none;
+position: fixed;
+z-index: 2000;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+backdrop-filter: blur(5px);
+}
+.modal-content {
+background: white;
+margin: 5% auto;
+padding: 30px;
+border-radius: 20px;
+width: 80%;
+max-width: 600px;
+max-height: 80vh;
+overflow-y: auto;
+box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+animation: modalSlideIn 0.2s ease;
+}
+@keyframes modalSlideIn {
+from { transform: translateY(-30px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+text-align: center;
+margin-bottom: 20px;
+}
+.modal-title {
+font-size: 2em;
+color: #333;
+margin: 0;
+}
+.close {
+color: #aaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+cursor: pointer;
+line-height: 1;
+}
+.close:hover {
+color: #000;
+}
+.help-section {
+margin: 20px 0;
+}
+.help-section h3 {
+color: #4ecdc4;
+border-bottom: 2px solid #4ecdc4;
+padding-bottom: 5px;
+}
+.help-section p, .help-section li {
+color: #666;
+line-height: 1.6;
+}
+.help-section ul {
+padding-left: 20px;
+}
+.rule-example {
+background: #f8f9fa;
+padding: 15px;
+border-radius: 10px;
+margin: 10px 0;
+border-left: 4px solid #4ecdc4;
+}
+</style>
+</head>
+<body>
+<div class="game-container">
+<div class="game-header">
+<h1 class="game-title">🎮 连连看</h1>
+<div class="game-info">
+<div>时间: <span id="timer">00:00</span></div>
+<div>分数: <span id="score">0</span></div>
+<div>剩余: <span id="remaining">24</span>对</div>
+</div>
+</div>
+<div class="game-board" id="gameBoard"></div>
+<div class="game-controls">
+<button class="btn" onclick="startNewGame()">新游戏</button>
+<button class="btn" onclick="shuffleBoard()">重新排列</button>
+<button class="btn" onclick="showHint()">提示</button>
+<button class="btn help" onclick="showHelp()">游戏说明</button>
+</div>
+<div class="game-complete" id="gameComplete">
+<h2>🎉 恭喜完成!</h2>
+<p>用时: <span id="finalTime"></span></p>
+<p>得分: <span id="finalScore"></span></p>
+</div>
+</div>
+<div class="notification" id="notification"></div>
+<!-- 游戏说明弹窗 -->
+<div id="helpModal" class="modal">
+<div class="modal-content">
+<span class="close" onclick="closeHelp()">&times;</span>
+<div class="modal-header">
+<h2 class="modal-title">🎯 游戏说明</h2>
+</div>
+<div class="help-section">
+<h3>🎮 游戏目标</h3>
+<p>消除所有相同的图标对,完成游戏挑战!</p>
+</div>
+<div class="help-section">
+<h3>📋 游戏规则</h3>
+<ul>
+<li>点击两个相同的图标进行连接</li>
+<li>连接线不能被其他图标阻挡</li>
+<li>连接线最多只能转一个弯(L型或直线)</li>
+<li>成功连接后,两个图标会消失</li>
+<li>消除所有图标即为胜利</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>🔄 连接类型</h3>
+<div class="rule-example">
+<strong>直线连接:</strong>两个图标在同一行或同一列,中间没有障碍物
+</div>
+<div class="rule-example">
+<strong>一次转弯:</strong>可以通过一个转角点连接,转角点必须是空的
+</div>
+</div>
+<div class="help-section">
+<h3>🛠️ 功能按钮</h3>
+<ul>
+<li><strong>新游戏:</strong>开始全新的游戏</li>
+<li><strong>重新排列:</strong>保持当前图标,重新随机排列位置</li>
+<li><strong>提示:</strong>高亮显示一对可以连接的图标</li>
+<li><strong>游戏说明:</strong>查看详细的游戏规则</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>🏆 计分系统</h3>
+<ul>
+<li>每成功消除一对图标得 100 分</li>
+<li>游戏时间越短得分越高</li>
+<li>使用提示功能不会扣分</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>💡 游戏技巧</h3>
+<ul>
+<li>优先消除边缘的图标,为内部图标创造连接机会</li>
+<li>观察整体布局,避免造成死局</li>
+<li>合理使用提示功能,在困难时获得帮助</li>
+<li>如果没有可连接的图标,游戏会自动重新排列</li>
+</ul>
+</div>
+</div>
+</div>
+<script>
+class LinkGame {
+constructor() {
+this.board = [];
+this.selectedTiles = [];
+this.score = 0;
+this.startTime = Date.now();
+this.gameBoard = document.getElementById('gameBoard');
+this.rows = 6;
+this.cols = 8;
+this.symbols = ['🍎', '🍌', '🍊', '🍇', '🍓', '🥝', '🍑', '🍒', '🥭', '🍍', '🥥', '🍉'];
+this.totalPairs = (this.rows * this.cols) / 2;
+this.remainingPairs = this.totalPairs;
+this.isProcessing = false; // 防止连续点击
+this.initGame();
+this.startTimer();
+}
+initGame() {
+this.createBoard();
+this.renderBoard();
+this.updateRemaining();
+}
+createBoard() {
+// 创建配对的图标
+const pairs = [];
+for (let i = 0; i < this.totalPairs; i++) {
+const symbol = this.symbols[i % this.symbols.length];
+pairs.push(symbol, symbol);
+}
+// 洗牌直到有解
+do {
+this.shuffle(pairs);
+this.board = [];
+for (let row = 0; row < this.rows; row++) {
+this.board[row] = [];
+for (let col = 0; col < this.cols; col++) {
+this.board[row][col] = pairs[row * this.cols + col];
+}
+}
+} while (!this.hasSolution());
+}
+shuffle(array) {
+for (let i = array.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[array[i], array[j]] = [array[j], array[i]];
+}
+}
+hasSolution() {
+// 检查是否存在至少一对可以连接的图标
+for (let row1 = 0; row1 < this.rows; row1++) {
+for (let col1 = 0; col1 < this.cols; col1++) {
+if (!this.board[row1][col1]) continue;
+for (let row2 = 0; row2 < this.rows; row2++) {
+for (let col2 = 0; col2 < this.cols; col2++) {
+if (row1 === row2 && col1 === col2) continue;
+if (!this.board[row2][col2]) continue;
+if (this.board[row1][col1] === this.board[row2][col2] &&
+this.canConnect(row1, col1, row2, col2)) {
+return true;
+}
+}
+}
+}
+}
+return false;
+}
+checkNoSolutionAndShuffle() {
+if (!this.hasSolution()) {
+this.showNotification('没有可连接的图标,自动重新排列!', 'warning');
+requestAnimationFrame(() => {
+this.shuffleCurrentBoard();
+});
+}
+}
+shuffleCurrentBoard() {
+// 收集当前棋盘上的所有图标
+const remainingTiles = [];
+for (let row = 0; row < this.rows; row++) {
+for (let col = 0; col < this.cols; col++) {
+if (this.board[row][col]) {
+remainingTiles.push(this.board[row][col]);
+}
+}
+}
+// 添加洗牌动画
+this.addShuffleAnimation();
+setTimeout(() => {
+// 洗牌直到有解
+do {
+this.shuffle(remainingTiles);
+// 重新分配到棋盘
+let tileIndex = 0;
+for (let row = 0; row < this.rows; row++) {
+for (let col = 0; col < this.cols; col++) {
+if (this.board[row][col] !== null) {
+this.board[row][col] = remainingTiles[tileIndex++];
+}
+}
+}
+} while (!this.hasSolution());
+this.renderBoard();
+this.clearSelection();
+this.isProcessing = false;
+}, 300);
+}
+addShuffleAnimation() {
+const tiles = document.querySelectorAll('.tile:not(.empty)');
+tiles.forEach(tile => {
+tile.classList.add('shuffling');
+setTimeout(() => {
+tile.classList.remove('shuffling');
+}, 300);
+});
+}
+renderBoard() {
+this.gameBoard.innerHTML = '';
+for (let row = 0; row < this.rows; row++) {
+for (let col = 0; col < this.cols; col++) {
+const tile = document.createElement('div');
+tile.className = 'tile';
+tile.dataset.row = row;
+tile.dataset.col = col;
+if (this.board[row][col]) {
+tile.textContent = this.board[row][col];
+tile.addEventListener('click', () => this.handleTileClick(row, col));
+} else {
+tile.className += ' empty';
+}
+this.gameBoard.appendChild(tile);
+}
+}
+}
+handleTileClick(row, col) {
+if (this.isProcessing || !this.board[row][col]) return;
+const tile = this.getTile(row, col);
+if (tile.classList.contains('selected')) {
+// 取消选择
+tile.classList.remove('selected');
+this.selectedTiles = this.selectedTiles.filter(t => !(t.row === row && t.col === col));
+return;
+}
+// 立即添加选中状态
+tile.classList.add('selected');
+this.selectedTiles.push({row, col, tile});
+if (this.selectedTiles.length === 2) {
+// 立即检查匹配
+this.checkMatch();
+}
+}
+getTile(row, col) {
+return document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+}
+checkMatch() {
+const [tile1, tile2] = this.selectedTiles;
+if (this.board[tile1.row][tile1.col] === this.board[tile2.row][tile2.col]) {
+if (this.canConnect(tile1.row, tile1.col, tile2.row, tile2.col)) {
+this.makeMatch(tile1, tile2);
+this.playSound('match');
+} else {
+this.clearSelection();
+this.playSound('error');
+}
+} else {
+this.clearSelection();
+this.playSound('error');
+}
+}
+canConnect(row1, col1, row2, col2) {
+return this.checkDirectConnection(row1, col1, row2, col2) ||
+this.checkOneCornerConnection(row1, col1, row2, col2);
+}
+checkDirectConnection(row1, col1, row2, col2) {
+if (row1 === row2) {
+const minCol = Math.min(col1, col2);
+const maxCol = Math.max(col1, col2);
+for (let col = minCol + 1; col < maxCol; col++) {
+if (this.board[row1][col]) return false;
+}
+return true;
+} else if (col1 === col2) {
+const minRow = Math.min(row1, row2);
+const maxRow = Math.max(row1, row2);
+for (let row = minRow + 1; row < maxRow; row++) {
+if (this.board[row][col1]) return false;
+}
+return true;
+}
+return false;
+}
+checkOneCornerConnection(row1, col1, row2, col2) {
+return this.checkCornerPath(row1, col1, row1, col2, row2, col2) ||
+this.checkCornerPath(row1, col1, row2, col1, row2, col2);
+}
+checkCornerPath(row1, col1, cornerRow, cornerCol, row2, col2) {
+if (this.board[cornerRow] && this.board[cornerRow][cornerCol]) return false;
+return this.checkDirectConnection(row1, col1, cornerRow, cornerCol) &&
+this.checkDirectConnection(cornerRow, cornerCol, row2, col2);
+}
+makeMatch(tile1, tile2) {
+this.isProcessing = true;
+// 立即更新分数和状态
+this.score += 100;
+this.remainingPairs--;
+document.getElementById('score').textContent = this.score;
+this.updateRemaining();
+tile1.tile.classList.add('matched');
+tile2.tile.classList.add('matched');
+setTimeout(() => {
+this.board[tile1.row][tile1.col] = null;
+this.board[tile2.row][tile2.col] = null;
+tile1.tile.classList.add('empty');
+tile2.tile.classList.add('empty');
+tile1.tile.textContent = '';
+tile2.tile.textContent = '';
+tile1.tile.classList.remove('matched', 'selected');
+tile2.tile.classList.remove('matched', 'selected');
+this.selectedTiles = [];
+if (this.checkGameComplete()) {
+this.endGame();
+} else {
+this.checkNoSolutionAndShuffle();
+}
+this.isProcessing = false;
+}, 150); // 大幅减少延迟
+}
+clearSelection() {
+this.selectedTiles.forEach(({tile}) => {
+tile.classList.remove('selected');
+});
+this.selectedTiles = [];
+}
+checkGameComplete() {
+return this.remainingPairs === 0;
+}
+updateRemaining() {
+document.getElementById('remaining').textContent = this.remainingPairs;
+}
+endGame() {
+const finalTime = this.formatTime(Date.now() - this.startTime);
+document.getElementById('finalTime').textContent = finalTime;
+document.getElementById('finalScore').textContent = this.score;
+document.getElementById('gameComplete').style.display = 'block';
+this.playSound('complete');
+}
+startTimer() {
+this.timerInterval = setInterval(() => {
+const elapsed = Date.now() - this.startTime;
+document.getElementById('timer').textContent = this.formatTime(elapsed);
+}, 1000);
+}
+formatTime(ms) {
+const seconds = Math.floor(ms / 1000);
+const minutes = Math.floor(seconds / 60);
+const remainingSeconds = seconds % 60;
+return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+showNotification(message, type = 'success') {
+const notification = document.getElementById('notification');
+notification.textContent = message;
+notification.className = `notification ${type}`;
+notification.classList.add('show');
+setTimeout(() => {
+notification.classList.remove('show');
+}, 2000);
+}
+playSound(type) {
+try {
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const oscillator = audioContext.createOscillator();
+const gainNode = audioContext.createGain();
+oscillator.connect(gainNode);
+gainNode.connect(audioContext.destination);
+switch(type) {
+case 'match':
+oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.05);
+break;
+case 'error':
+oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+break;
+case 'complete':
+oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+break;
+}
+gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+oscillator.start(audioContext.currentTime);
+oscillator.stop(audioContext.currentTime + 0.3);
+} catch (e) {
+console.log('音频播放失败:', e);
+}
+}
+}
+let game;
+function startNewGame() {
+document.getElementById('gameComplete').style.display = 'none';
+if (game && game.timerInterval) {
+clearInterval(game.timerInterval);
+}
+game = new LinkGame();
+}
+function shuffleBoard() {
+if (game && !game.isProcessing) {
+game.isProcessing = true;
+game.shuffleCurrentBoard();
+game.showNotification('棋盘已重新排列!', 'success');
+}
+}
+function showHint() {
+if (!game || game.isProcessing) return;
+for (let row1 = 0; row1 < game.rows; row1++) {
+for (let col1 = 0; col1 < game.cols; col1++) {
+if (!game.board[row1][col1]) continue;
+for (let row2 = 0; row2 < game.rows; row2++) {
+for (let col2 = 0; col2 < game.cols; col2++) {
+if (row1 === row2 && col1 === col2) continue;
+if (!game.board[row2][col2]) continue;
+if (game.board[row1][col1] === game.board[row2][col2] &&
+game.canConnect(row1, col1, row2, col2)) {
+const tile1 = game.getTile(row1, col1);
+const tile2 = game.getTile(row2, col2);
+tile1.style.border = '3px solid #ff6b6b';
+tile2.style.border = '3px solid #ff6b6b';
+setTimeout(() => {
+tile1.style.border = '2px solid #ddd';
+tile2.style.border = '2px solid #ddd';
+}, 1500);
+game.showNotification('已为您标出可连接的图标!', 'success');
+return;
+}
+}
+}
+}
+}
+game.showNotification('当前没有可连接的图标,将自动重排!', 'warning');
+setTimeout(() => {
+game.shuffleCurrentBoard();
+}, 500);
+}
+function showHelp() {
+document.getElementById('helpModal').style.display = 'block';
+}
+function closeHelp() {
+document.getElementById('helpModal').style.display = 'none';
+}
+// 点击弹窗外部关闭
+window.onclick = function(event) {
+const modal = document.getElementById('helpModal');
+if (event.target === modal) {
+modal.style.display = 'none';
+}
+}
+// 启动游戏
+startNewGame();
+// 首次打开显示游戏说明
+setTimeout(() => {
+showHelp();
+}, 1000);
+</script>
+</body>
+</html>
