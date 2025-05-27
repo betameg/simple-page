@@ -1,0 +1,988 @@
+﻿
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .remote-control {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 25px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .remote-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12, #e74c3c);
+            border-radius: 25px 25px 0 0;
+        }
+
+        .brand {
+            text-align: center;
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .display {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .temperature {
+            text-align: center;
+            color: #3498db;
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        .mode-indicator {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .power-off .temperature {
+            color: #7f8c8d;
+            text-shadow: none;
+        }
+
+        .power-off .mode-indicator {
+            color: #7f8c8d;
+        }
+
+        .button-group {
+            margin-bottom: 20px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .button {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .power-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .power-btn.on {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+        }
+
+        .temp-btn {
+            width: 45%;
+            font-size: 18px;
+            padding: 15px;
+        }
+
+        .temp-up {
+            background: linear-gradient(145deg, #e67e22, #d35400);
+        }
+
+        .temp-down {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        .mode-btn, .fan-btn, .timer-btn {
+            width: 30%;
+            padding: 10px 5px;
+            font-size: 11px;
+        }
+
+        .swing-btn {
+            width: 100%;
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            margin-bottom: 15px;
+        }
+
+        .active {
+            background: linear-gradient(145deg, #2ecc71, #27ae60) !important;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease;
+        }
+
+        .footer {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 10px;
+            margin-top: 15px;
+        }
+    
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能空调遥控器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .remote-control {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 25px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 280px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .remote-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12, #e74c3c);
+            border-radius: 25px 25px 0 0;
+        }
+
+        .brand {
+            text-align: center;
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .display {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .temperature {
+            text-align: center;
+            color: #3498db;
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        .mode-indicator {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .power-off .temperature {
+            color: #7f8c8d;
+            text-shadow: none;
+        }
+
+        .power-off .mode-indicator {
+            color: #7f8c8d;
+        }
+
+        .button-group {
+            margin-bottom: 20px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .button {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .power-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .power-btn.on {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+        }
+
+        .temp-btn {
+            width: 45%;
+            font-size: 18px;
+            padding: 15px;
+        }
+
+        .temp-up {
+            background: linear-gradient(145deg, #e67e22, #d35400);
+        }
+
+        .temp-down {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        .mode-btn, .fan-btn, .timer-btn {
+            width: 30%;
+            padding: 10px 5px;
+            font-size: 11px;
+        }
+
+        .swing-btn {
+            width: 100%;
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            margin-bottom: 15px;
+        }
+
+        .active {
+            background: linear-gradient(145deg, #2ecc71, #27ae60) !important;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease;
+        }
+
+        .footer {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="remote-control">
+        <div class="brand">智能空调</div>
+        
+        <div class="display" id="display">
+            <div class="temperature" id="temperature">25°</div>
+            <div class="status">
+                <span class="mode-indicator" id="modeDisplay">制冷</span>
+                <span id="fanDisplay">风速: 中</span>
+                <span id="powerStatus">开机</span>
+            </div>
+        </div>
+
+        <button class="button power-btn on" id="powerBtn">
+            🔘 电源
+        </button>
+
+        <div class="button-row">
+            <button class="button temp-btn temp-up" id="tempUp">
+                ▲ 升温
+            </button>
+            <button class="button temp-btn temp-down" id="tempDown">
+                ▼ 降温
+            </button>
+        </div>
+
+        <div class="button-row">
+            <button class="button mode-btn" id="modeBtn">
+                ❄️ 模式
+            </button>
+            <button class="button fan-btn" id="fanBtn">
+                🌀 风速
+            </button>
+            <button class="button timer-btn" id="timerBtn">
+                ⏰ 定时
+            </button>
+        </div>
+
+        <button class="button swing-btn" id="swingBtn">
+            ↕️ 摆风
+        </button>
+
+        <div class="footer">
+            智能家居 v2.0
+        </div>
+    </div>
+
+    <script>
+        // 空调状态
+        let acState = {
+            power: true,
+            temperature: 25,
+            mode: 0, // 0: 制冷, 1: 制热, 2: 送风, 3: 除湿
+            fanSpeed: 1, // 0: 低, 1: 中, 2: 高, 3: 自动
+            swing: false,
+            timer: 0
+        };
+
+        const modes = ['制冷', '制热', '送风', '除湿'];
+        const fanSpeeds = ['低', '中', '高', '自动'];
+        const modeIcons = ['❄️', '🔥', '🌀', '💧'];
+
+        // 创建音频上下文
+        let audioContext;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // 播放普通按钮音效 - 典型的空调遥控器短促滴声
+        function playClickSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 空调遥控器典型的高频短促音效
+            oscillator.frequency.setValueAtTime(2200, audioContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.08);
+        }
+
+        // 播放开机音效 - 空调开机的上升音调
+        function playPowerOnSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 开机音：从低频到高频的上升音调
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+            oscillator.frequency.linearRampToValueAtTime(1600, audioContext.currentTime + 0.25);
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.2);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        // 播放关机音效 - 空调关机的下降音调
+        function playPowerOffSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 关机音：从高频到低频的下降音调
+            oscillator.frequency.setValueAtTime(1600, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+            oscillator.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 0.35);
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.25);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // 播放模式切换音效 - 双音调确认音
+        function playModeSound() {
+            initAudio();
+            
+            // 第一个音调
+            const oscillator1 = audioContext.createOscillator();
+            const gainNode1 = audioContext.createGain();
+            
+            oscillator1.connect(gainNode1);
+            gainNode1.connect(audioContext.destination);
+            
+            oscillator1.frequency.setValueAtTime(1800, audioContext.currentTime);
+            oscillator1.type = 'square';
+            
+            gainNode1.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode1.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.02);
+            gainNode1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            
+            oscillator1.start(audioContext.currentTime);
+            oscillator1.stop(audioContext.currentTime + 0.1);
+            
+            // 第二个音调（稍后）
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+            
+            oscillator2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+            
+            oscillator2.frequency.setValueAtTime(2200, audioContext.currentTime + 0.08);
+            oscillator2.type = 'square';
+            
+            gainNode2.gain.setValueAtTime(0, audioContext.currentTime + 0.08);
+            gainNode2.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.1);
+            gainNode2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.18);
+            
+            oscillator2.start(audioContext.currentTime + 0.08);
+            oscillator2.stop(audioContext.currentTime + 0.18);
+        }
+
+        // 播放温度调节音效 - 渐进音调
+        function playTempSound(isUp) {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (isUp) {
+                // 升温：音调上升
+                oscillator.frequency.setValueAtTime(1500, audioContext.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(2000, audioContext.currentTime + 0.12);
+            } else {
+                // 降温：音调下降
+                oscillator.frequency.setValueAtTime(2000, audioContext.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(1500, audioContext.currentTime + 0.12);
+            }
+            
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
+
+        // 按钮动画效果
+        function animateButton(button) {
+            button.classList.add('pulse');
+            setTimeout(() => {
+                button.classList.remove('pulse');
+            }, 300);
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            const temperature = document.getElementById('temperature');
+            const modeDisplay = document.getElementById('modeDisplay');
+            const fanDisplay = document.getElementById('fanDisplay');
+            const powerStatus = document.getElementById('powerStatus');
+            
+            if (acState.power) {
+                display.classList.remove('power-off');
+                temperature.textContent = `${acState.temperature}°`;
+                modeDisplay.textContent = modes[acState.mode];
+                fanDisplay.textContent = `风速: ${fanSpeeds[acState.fanSpeed]}`;
+                powerStatus.textContent = '开机';
+            } else {
+                display.classList.add('power-off');
+                temperature.textContent = '--°';
+                modeDisplay.textContent = '关机';
+                fanDisplay.textContent = '风速: --';
+                powerStatus.textContent = '关机';
+            }
+        }
+
+        // 事件监听器
+        document.getElementById('powerBtn').addEventListener('click', function() {
+            acState.power = !acState.power;
+            this.classList.toggle('on', acState.power);
+            this.innerHTML = acState.power ? '🔘 电源' : '⭕ 电源';
+            
+            // 播放相应的开关机音效
+            if (acState.power) {
+                playPowerOnSound();
+            } else {
+                playPowerOffSound();
+            }
+            
+            animateButton(this);
+            updateDisplay();
+        });
+
+        document.getElementById('tempUp').addEventListener('click', function() {
+            if (acState.power && acState.temperature < 30) {
+                acState.temperature++;
+                playTempSound(true); // 升温音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('tempDown').addEventListener('click', function() {
+            if (acState.power && acState.temperature > 16) {
+                acState.temperature--;
+                playTempSound(false); // 降温音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('modeBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.mode = (acState.mode + 1) % modes.length;
+                this.innerHTML = `${modeIcons[acState.mode]} 模式`;
+                playModeSound(); // 模式切换音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('fanBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.fanSpeed = (acState.fanSpeed + 1) % fanSpeeds.length;
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('swingBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.swing = !acState.swing;
+                this.classList.toggle('active', acState.swing);
+                this.innerHTML = acState.swing ? '↕️ 摆风 开' : '↕️ 摆风';
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+            }
+        });
+
+        document.getElementById('timerBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.timer = acState.timer === 0 ? 1 : acState.timer === 1 ? 2 : acState.timer === 2 ? 4 : 0;
+                this.classList.toggle('active', acState.timer > 0);
+                this.innerHTML = acState.timer > 0 ? `⏰ ${acState.timer}H` : '⏰ 定时';
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+            }
+        });
+
+        // 初始化显示
+        updateDisplay();
+        
+        // 添加初始音频上下文交互
+        document.addEventListener('click', initAudio, { once: true });
+    </script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+        // 空调状态
+        let acState = {
+            power: true,
+            temperature: 25,
+            mode: 0, // 0: 制冷, 1: 制热, 2: 送风, 3: 除湿
+            fanSpeed: 1, // 0: 低, 1: 中, 2: 高, 3: 自动
+            swing: false,
+            timer: 0
+        };
+
+        const modes = ['制冷', '制热', '送风', '除湿'];
+        const fanSpeeds = ['低', '中', '高', '自动'];
+        const modeIcons = ['❄️', '🔥', '🌀', '💧'];
+
+        // 创建音频上下文
+        let audioContext;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // 播放普通按钮音效 - 典型的空调遥控器短促滴声
+        function playClickSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 空调遥控器典型的高频短促音效
+            oscillator.frequency.setValueAtTime(2200, audioContext.currentTime);
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.08);
+        }
+
+        // 播放开机音效 - 空调开机的上升音调
+        function playPowerOnSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 开机音：从低频到高频的上升音调
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+            oscillator.frequency.linearRampToValueAtTime(1600, audioContext.currentTime + 0.25);
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.2);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        // 播放关机音效 - 空调关机的下降音调
+        function playPowerOffSound() {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 关机音：从高频到低频的下降音调
+            oscillator.frequency.setValueAtTime(1600, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+            oscillator.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 0.35);
+            oscillator.type = 'triangle';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.25);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // 播放模式切换音效 - 双音调确认音
+        function playModeSound() {
+            initAudio();
+            
+            // 第一个音调
+            const oscillator1 = audioContext.createOscillator();
+            const gainNode1 = audioContext.createGain();
+            
+            oscillator1.connect(gainNode1);
+            gainNode1.connect(audioContext.destination);
+            
+            oscillator1.frequency.setValueAtTime(1800, audioContext.currentTime);
+            oscillator1.type = 'square';
+            
+            gainNode1.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode1.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.02);
+            gainNode1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            
+            oscillator1.start(audioContext.currentTime);
+            oscillator1.stop(audioContext.currentTime + 0.1);
+            
+            // 第二个音调（稍后）
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+            
+            oscillator2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+            
+            oscillator2.frequency.setValueAtTime(2200, audioContext.currentTime + 0.08);
+            oscillator2.type = 'square';
+            
+            gainNode2.gain.setValueAtTime(0, audioContext.currentTime + 0.08);
+            gainNode2.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.1);
+            gainNode2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.18);
+            
+            oscillator2.start(audioContext.currentTime + 0.08);
+            oscillator2.stop(audioContext.currentTime + 0.18);
+        }
+
+        // 播放温度调节音效 - 渐进音调
+        function playTempSound(isUp) {
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (isUp) {
+                // 升温：音调上升
+                oscillator.frequency.setValueAtTime(1500, audioContext.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(2000, audioContext.currentTime + 0.12);
+            } else {
+                // 降温：音调下降
+                oscillator.frequency.setValueAtTime(2000, audioContext.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(1500, audioContext.currentTime + 0.12);
+            }
+            
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
+
+        // 按钮动画效果
+        function animateButton(button) {
+            button.classList.add('pulse');
+            setTimeout(() => {
+                button.classList.remove('pulse');
+            }, 300);
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            const temperature = document.getElementById('temperature');
+            const modeDisplay = document.getElementById('modeDisplay');
+            const fanDisplay = document.getElementById('fanDisplay');
+            const powerStatus = document.getElementById('powerStatus');
+            
+            if (acState.power) {
+                display.classList.remove('power-off');
+                temperature.textContent = `${acState.temperature}°`;
+                modeDisplay.textContent = modes[acState.mode];
+                fanDisplay.textContent = `风速: ${fanSpeeds[acState.fanSpeed]}`;
+                powerStatus.textContent = '开机';
+            } else {
+                display.classList.add('power-off');
+                temperature.textContent = '--°';
+                modeDisplay.textContent = '关机';
+                fanDisplay.textContent = '风速: --';
+                powerStatus.textContent = '关机';
+            }
+        }
+
+        // 事件监听器
+        document.getElementById('powerBtn').addEventListener('click', function() {
+            acState.power = !acState.power;
+            this.classList.toggle('on', acState.power);
+            this.innerHTML = acState.power ? '🔘 电源' : '⭕ 电源';
+            
+            // 播放相应的开关机音效
+            if (acState.power) {
+                playPowerOnSound();
+            } else {
+                playPowerOffSound();
+            }
+            
+            animateButton(this);
+            updateDisplay();
+        });
+
+        document.getElementById('tempUp').addEventListener('click', function() {
+            if (acState.power && acState.temperature < 30) {
+                acState.temperature++;
+                playTempSound(true); // 升温音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('tempDown').addEventListener('click', function() {
+            if (acState.power && acState.temperature > 16) {
+                acState.temperature--;
+                playTempSound(false); // 降温音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('modeBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.mode = (acState.mode + 1) % modes.length;
+                this.innerHTML = `${modeIcons[acState.mode]} 模式`;
+                playModeSound(); // 模式切换音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('fanBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.fanSpeed = (acState.fanSpeed + 1) % fanSpeeds.length;
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('swingBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.swing = !acState.swing;
+                this.classList.toggle('active', acState.swing);
+                this.innerHTML = acState.swing ? '↕️ 摆风 开' : '↕️ 摆风';
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+            }
+        });
+
+        document.getElementById('timerBtn').addEventListener('click', function() {
+            if (acState.power) {
+                acState.timer = acState.timer === 0 ? 1 : acState.timer === 1 ? 2 : acState.timer === 2 ? 4 : 0;
+                this.classList.toggle('active', acState.timer > 0);
+                this.innerHTML = acState.timer > 0 ? `⏰ ${acState.timer}H` : '⏰ 定时';
+                playClickSound(); // 普通点击音效
+                animateButton(this);
+            }
+        });
+
+        // 初始化显示
+        updateDisplay();
+        
+        // 添加初始音频上下文交互
+        document.addEventListener('click', initAudio, { once: true });
+    
+
+							</script>
+                        </body>
+                        </html>
+                    
