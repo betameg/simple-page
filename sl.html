@@ -1,0 +1,1177 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>扫雷游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            touch-action: manipulation;
+            overflow-x: auto;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 600px;
+            min-width: 320px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .help-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(252, 182, 159, 0.3);
+        }
+
+        .help-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .info-value {
+            font-size: 1.2em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            min-width: 80px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(168, 237, 234, 0.3);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .game-board-container {
+            width: 100%;
+            overflow: auto;
+            border-radius: 10px;
+            background: #ddd;
+            padding: 3px;
+            max-height: 70vh;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 1px;
+            margin: 0 auto;
+            touch-action: manipulation;
+            min-width: fit-content;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 更紧凑的格子尺寸 */
+        .difficulty-easy .cell {
+            width: 32px;
+            height: 32px;
+            font-size: 1.1em;
+        }
+
+        .difficulty-medium .cell {
+            width: 25px;
+            height: 25px;
+            font-size: 0.9em;
+        }
+
+        .difficulty-hard .cell {
+            width: 20px;
+            height: 20px;
+            font-size: 0.75em;
+        }
+
+        /* 移动端进一步优化 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+                margin: 5px;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .difficulty-easy .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 1em;
+            }
+
+            .difficulty-medium .cell {
+                width: 23px;
+                height: 23px;
+                font-size: 0.8em;
+            }
+
+            .difficulty-hard .cell {
+                width: 18px;
+                height: 18px;
+                font-size: 0.7em;
+            }
+            
+            .btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .controls {
+                gap: 5px;
+            }
+
+            .game-board {
+                gap: 0.5px;
+            }
+        }
+
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            .difficulty-hard .cell {
+                width: 16px;
+                height: 16px;
+                font-size: 0.65em;
+            }
+
+            .difficulty-medium .cell {
+                width: 20px;
+                height: 20px;
+                font-size: 0.75em;
+            }
+        }
+
+        .cell:active {
+            transform: scale(0.95);
+        }
+
+        .cell.revealed {
+            background: #fff;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell.flagged {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+        }
+
+        .cell.mine {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            animation: explode 0.5s ease-out;
+        }
+
+        .cell.mine-exploded {
+            background: linear-gradient(135deg, #ff0000 0%, #8B0000 100%);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .cell.number-1 { color: #0080ff; }
+        .cell.number-2 { color: #00ff00; }
+        .cell.number-3 { color: #ff0000; }
+        .cell.number-4 { color: #800080; }
+        .cell.number-5 { color: #800000; }
+        .cell.number-6 { color: #40e0d0; }
+        .cell.number-7 { color: #000000; }
+        .cell.number-8 { color: #808080; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .help-modal {
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .game-over-modal {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: #ff6b6b;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .help-content {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .help-section p {
+            margin-bottom: 8px;
+        }
+
+        .control-demo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .demo-cell {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .demo-empty { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .demo-number { background: #fff; color: #0080ff; }
+        .demo-flag { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: white; }
+        .demo-mine { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white; }
+
+        .game-over-title {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .game-over-message {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .celebration {
+            animation: pulse 0.6s ease-in-out infinite;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 缩放控制器 */
+        .zoom-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .zoom-controls.show {
+            display: flex;
+        }
+
+        .zoom-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 滚动提示 */
+        .scroll-hint {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .scroll-hint.show {
+            opacity: 1;
+        }
+
+        /* 欢迎提示 */
+        .welcome-tip {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(79, 172, 254, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .welcome-tip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-tip" id="welcome-tip">
+        💡 首次游戏？点击右上角 ❓ 查看游戏说明
+    </div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">💣 扫雷游戏</h1>
+            <button class="help-btn" onclick="showHelp()" title="游戏说明">❓</button>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">
+                <span class="info-label">雷数</span>
+                <span class="info-value" id="mine-count">10</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">时间</span>
+                <span class="info-value" id="timer">000</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">状态</span>
+                <span class="info-value" id="game-status">😊</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="startNewGame()">🔄 新游戏</button>
+            <button class="btn difficulty-btn active" onclick="setDifficulty('easy')" data-difficulty="easy">简单</button>
+            <button class="btn difficulty-btn" onclick="setDifficulty('medium')" data-difficulty="medium">中等</button>
+            <button class="btn difficulty-btn" onclick="setDifficulty('hard')" data-difficulty="hard">困难</button>
+        </div>
+
+        <div class="game-board-container">
+            <div class="game-board" id="game-board"></div>
+            <div class="scroll-hint" id="scroll-hint">👆 可滑动查看</div>
+        </div>
+    </div>
+
+    <div class="zoom-controls" id="zoom-controls">
+        <button class="zoom-btn" onclick="adjustZoom(1.1)">+</button>
+        <button class="zoom-btn" onclick="adjustZoom(0.9)">-</button>
+        <button class="zoom-btn" onclick="resetZoom()" style="font-size: 1.2em;">⌂</button>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div class="modal-overlay" id="help-overlay">
+        <div class="modal help-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🎮 游戏说明</h2>
+                <button class="close-btn" onclick="hideHelp()">×</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>找出所有地雷，同时避免点击到地雷。成功揭开所有非地雷格子即可获胜！</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🕹️ 操作方式</h3>
+                    <div class="control-demo">
+                        <div class="demo-cell demo-empty"></div>
+                        <span><strong>点击</strong> 揭开格子</span>
+                    </div>
+                    <div class="control-demo">
+                        <div class="demo-cell demo-flag">🚩</div>
+                        <span><strong>长按</strong> 标记地雷</span>
+                    </div>
+                    <p style="font-size: 0.9em; color: #666;">💡 电脑端：右键标记地雷，手机端：长按0.4秒标记</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🔢 数字含义</h3>
+                    <div class="control-demo">
+                        <div class="demo-cell demo-number">1</div>
+                        <span>周围8个格子中有1个地雷</span>
+                    </div>
+                    <div class="control-demo">
+                        <div class="demo-cell demo-number">2</div>
+                        <span>周围8个格子中有2个地雷</span>
+                    </div>
+                    <p>数字越大，周围地雷越多（最大为8）</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>💣 地雷与失败</h3>
+                    <div class="control-demo">
+                        <div class="demo-cell demo-mine">💣</div>
+                        <span>点到地雷 = 游戏结束</span>
+                    </div>
+                    <p>游戏结束时会显示所有地雷位置</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🏆 难度选择</h3>
+                    <p><strong>简单：</strong> 9×9，10个地雷 - 适合新手</p>
+                    <p><strong>中等：</strong> 12×12，25个地雷 - 中等挑战</p>
+                    <p><strong>困难：</strong> 16×16，40个地雷 - 高级玩家</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>📱 移动端技巧</h3>
+                    <p>• 困难模式可滑动查看整个棋盘</p>
+                    <p>• 使用右下角缩放按钮调整大小</p>
+                    <p>• 长按振动反馈确认标记成功</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 游戏技巧</h3>
+                    <p>• 从边角开始，风险较小</p>
+                    <p>• 利用数字逻辑推理地雷位置</p>
+                    <p>• 及时标记确定的地雷位置</p>
+                    <p>• 空白格子会自动展开相邻区域</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏结束弹窗 -->
+    <div class="modal-overlay" id="game-over-overlay">
+        <div class="modal game-over-modal">
+            <h2 class="game-over-title" id="game-over-title"></h2>
+            <p class="game-over-message" id="game-over-message"></p>
+            <button class="btn" onclick="startNewGame(); hideGameOver();">再来一局</button>
+        </div>
+    </div>
+
+    <script>
+        class MinesweeperGame {
+            constructor() {
+                this.difficulties = {
+                    easy: { rows: 9, cols: 9, mines: 10 },
+                    medium: { rows: 12, cols: 12, mines: 25 },
+                    hard: { rows: 16, cols: 16, mines: 40 }
+                };
+                
+                this.currentDifficulty = 'easy';
+                this.board = [];
+                this.gameState = 'ready';
+                this.startTime = null;
+                this.timer = null;
+                this.flagCount = 0;
+                this.revealedCount = 0;
+                this.currentZoom = 1;
+                this.isFirstVisit = !localStorage.getItem('minesweeper_visited');
+                
+                this.audioContext = null;
+                this.initAudio();
+                this.init();
+                this.initZoomControls();
+                this.showWelcomeTip();
+            }
+
+            showWelcomeTip() {
+                if (this.isFirstVisit) {
+                    setTimeout(() => {
+                        document.getElementById('welcome-tip').classList.add('show');
+                        setTimeout(() => {
+                            document.getElementById('welcome-tip').classList.remove('show');
+                        }, 5000);
+                    }, 1000);
+                    localStorage.setItem('minesweeper_visited', 'true');
+                }
+            }
+
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            initZoomControls() {
+                const checkNeedZoom = () => {
+                    const isMobile = window.innerWidth <= 480;
+                    const isHardMode = this.currentDifficulty === 'hard';
+                    const zoomControls = document.getElementById('zoom-controls');
+                    
+                    if (isMobile && isHardMode) {
+                        zoomControls.classList.add('show');
+                        this.showScrollHint();
+                    } else {
+                        zoomControls.classList.remove('show');
+                        this.hideScrollHint();
+                    }
+                };
+
+                window.addEventListener('resize', checkNeedZoom);
+                checkNeedZoom();
+            }
+
+            showScrollHint() {
+                const hint = document.getElementById('scroll-hint');
+                hint.classList.add('show');
+                setTimeout(() => {
+                    hint.classList.remove('show');
+                }, 3000);
+            }
+
+            hideScrollHint() {
+                document.getElementById('scroll-hint').classList.remove('show');
+            }
+
+            playSound(type) {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                let frequency, duration;
+                
+                switch (type) {
+                    case 'click':
+                        frequency = 800;
+                        duration = 0.1;
+                        break;
+                    case 'flag':
+                        frequency = 1200;
+                        duration = 0.15;
+                        break;
+                    case 'explosion':
+                        frequency = 200;
+                        duration = 0.5;
+                        break;
+                    case 'win':
+                        frequency = 600;
+                        duration = 1;
+                        break;
+                }
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            init() {
+                this.createBoard();
+                this.renderBoard();
+                this.updateDisplay();
+                this.initZoomControls();
+            }
+
+            createBoard() {
+                const config = this.difficulties[this.currentDifficulty];
+                this.board = [];
+                
+                for (let i = 0; i < config.rows; i++) {
+                    this.board[i] = [];
+                    for (let j = 0; j < config.cols; j++) {
+                        this.board[i][j] = {
+                            isMine: false,
+                            isRevealed: false,
+                            isFlagged: false,
+                            neighborMines: 0
+                        };
+                    }
+                }
+                
+                let minesPlaced = 0;
+                while (minesPlaced < config.mines) {
+                    const row = Math.floor(Math.random() * config.rows);
+                    const col = Math.floor(Math.random() * config.cols);
+                    
+                    if (!this.board[row][col].isMine) {
+                        this.board[row][col].isMine = true;
+                        minesPlaced++;
+                    }
+                }
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        if (!this.board[i][j].isMine) {
+                            this.board[i][j].neighborMines = this.countNeighborMines(i, j);
+                        }
+                    }
+                }
+                
+                this.gameState = 'ready';
+                this.flagCount = 0;
+                this.revealedCount = 0;
+            }
+
+            countNeighborMines(row, col) {
+                let count = 0;
+                const config = this.difficulties[this.currentDifficulty];
+                
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        
+                        if (newRow >= 0 && newRow < config.rows && 
+                            newCol >= 0 && newCol < config.cols &&
+                            this.board[newRow][newCol].isMine) {
+                            count++;
+                        }
+                    }
+                }
+                
+                return count;
+            }
+
+            renderBoard() {
+                const config = this.difficulties[this.currentDifficulty];
+                const gameBoard = document.getElementById('game-board');
+                
+                gameBoard.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
+                gameBoard.innerHTML = '';
+                gameBoard.className = `game-board difficulty-${this.currentDifficulty}`;
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        const cell = document.createElement('button');
+                        cell.className = 'cell';
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        
+                        cell.addEventListener('touchstart', (e) => {
+                            e.preventDefault();
+                        });
+                        
+                        cell.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.handleCellClick(i, j);
+                            this.createRipple(e, cell);
+                        });
+                        
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.handleCellRightClick(i, j);
+                        });
+                        
+                        let pressTimer;
+                        cell.addEventListener('touchstart', (e) => {
+                            e.preventDefault();
+                            pressTimer = setTimeout(() => {
+                                this.handleCellRightClick(i, j);
+                                navigator.vibrate && navigator.vibrate(50);
+                            }, 400);
+                        });
+                        
+                        cell.addEventListener('touchend', () => {
+                            clearTimeout(pressTimer);
+                        });
+                        
+                        cell.addEventListener('touchmove', () => {
+                            clearTimeout(pressTimer);
+                        });
+                        
+                        gameBoard.appendChild(cell);
+                    }
+                }
+            }
+
+            createRipple(e, element) {
+                const ripple = document.createElement('span');
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.className = 'ripple';
+                
+                element.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+
+            handleCellClick(row, col) {
+                if (this.gameState === 'won' || this.gameState === 'lost') return;
+                if (this.board[row][col].isFlagged || this.board[row][col].isRevealed) return;
+                
+                if (this.gameState === 'ready') {
+                    this.gameState = 'playing';
+                    this.startTimer();
+                }
+                
+                this.playSound('click');
+                
+                if (this.board[row][col].isMine) {
+                    this.gameOver(false, row, col);
+                    return;
+                }
+                
+                this.revealCell(row, col);
+                this.updateDisplay();
+                this.checkWin();
+            }
+
+            handleCellRightClick(row, col) {
+                if (this.gameState === 'won' || this.gameState === 'lost') return;
+                if (this.board[row][col].isRevealed) return;
+                
+                this.board[row][col].isFlagged = !this.board[row][col].isFlagged;
+                this.flagCount += this.board[row][col].isFlagged ? 1 : -1;
+                
+                this.playSound('flag');
+                this.updateDisplay();
+            }
+
+            revealCell(row, col) {
+                const config = this.difficulties[this.currentDifficulty];
+                
+                if (row < 0 || row >= config.rows || col < 0 || col >= config.cols) return;
+                if (this.board[row][col].isRevealed || this.board[row][col].isFlagged) return;
+                
+                this.board[row][col].isRevealed = true;
+                this.revealedCount++;
+                
+                if (this.board[row][col].neighborMines === 0) {
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            this.revealCell(row + i, col + j);
+                        }
+                    }
+                }
+            }
+
+            updateDisplay() {
+                const config = this.difficulties[this.currentDifficulty];
+                
+                document.getElementById('mine-count').textContent = config.mines - this.flagCount;
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                        const cellData = this.board[i][j];
+                        
+                        cell.className = 'cell';
+                        cell.textContent = '';
+                        
+                        if (cellData.isFlagged) {
+                            cell.classList.add('flagged');
+                            cell.textContent = '🚩';
+                        } else if (cellData.isRevealed) {
+                            cell.classList.add('revealed');
+                            
+                            if (cellData.isMine) {
+                                cell.classList.add('mine');
+                                cell.textContent = '💣';
+                            } else if (cellData.neighborMines > 0) {
+                                cell.textContent = cellData.neighborMines;
+                                cell.classList.add(`number-${cellData.neighborMines}`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            checkWin() {
+                const config = this.difficulties[this.currentDifficulty];
+                const totalCells = config.rows * config.cols;
+                
+                if (this.revealedCount === totalCells - config.mines) {
+                    this.gameOver(true);
+                }
+            }
+
+            gameOver(won, explodedRow = -1, explodedCol = -1) {
+                this.gameState = won ? 'won' : 'lost';
+                this.stopTimer();
+                
+                if (won) {
+                    this.playSound('win');
+                    document.getElementById('game-status').textContent = '🎉';
+                    this.showGameOver('恭喜获胜！', `用时 ${document.getElementById('timer').textContent} 秒`);
+                    document.querySelector('.game-container').classList.add('celebration');
+                } else {
+                    this.playSound('explosion');
+                    document.getElementById('game-status').textContent = '💀';
+                    
+                    const config = this.difficulties[this.currentDifficulty];
+                    for (let i = 0; i < config.rows; i++) {
+                        for (let j = 0; j < config.cols; j++) {
+                            if (this.board[i][j].isMine) {
+                                const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                                cell.classList.add('mine');
+                                cell.textContent = '💣';
+                                
+                                if (i === explodedRow && j === explodedCol) {
+                                    cell.classList.add('mine-exploded');
+                                }
+                            }
+                        }
+                    }
+                    
+                    this.showGameOver('游戏结束', '踩到地雷了！');
+                }
+            }
+
+            showGameOver(title, message) {
+                document.getElementById('game-over-title').textContent = title;
+                document.getElementById('game-over-message').textContent = message;
+                document.getElementById('game-over-overlay').classList.add('show');
+            }
+
+            startTimer() {
+                this.startTime = Date.now();
+                this.timer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    document.getElementById('timer').textContent = elapsed.toString().padStart(3, '0');
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+
+            setDifficulty(difficulty) {
+                this.currentDifficulty = difficulty;
+                this.currentZoom = 1;
+                
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-difficulty="${difficulty}"]`).classList.add('active');
+                
+                this.startNewGame();
+            }
+
+            startNewGame() {
+                this.stopTimer();
+                document.getElementById('timer').textContent = '000';
+                document.getElementById('game-status').textContent = '😊';
+                document.querySelector('.game-container').classList.remove('celebration');
+                this.resetZoom();
+                this.init();
+            }
+
+            resetZoom() {
+                this.currentZoom = 1;
+                const gameBoard = document.getElementById('game-board');
+                gameBoard.style.transform = 'scale(1)';
+                gameBoard.style.transformOrigin = 'center';
+            }
+
+            adjustZoom(factor) {
+                this.currentZoom *= factor;
+                this.currentZoom = Math.max(0.5, Math.min(2, this.currentZoom));
+                
+                const gameBoard = document.getElementById('game-board');
+                gameBoard.style.transform = `scale(${this.currentZoom})`;
+                gameBoard.style.transformOrigin = 'center';
+            }
+        }
+
+        // 全局函数
+        let game;
+
+        function startNewGame() {
+            game.startNewGame();
+        }
+
+        function setDifficulty(difficulty) {
+            game.setDifficulty(difficulty);
+        }
+
+        function hideGameOver() {
+            document.getElementById('game-over-overlay').classList.remove('show');
+        }
+
+        function adjustZoom(factor) {
+            game.adjustZoom(factor);
+        }
+
+        function resetZoom() {
+            game.resetZoom();
+        }
+
+        function showHelp() {
+            document.getElementById('help-overlay').classList.add('show');
+        }
+
+        function hideHelp() {
+            document.getElementById('help-overlay').classList.remove('show');
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new MinesweeperGame();
+            
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            });
+            
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            });
+
+            // 点击弹窗外部关闭
+            document.getElementById('help-overlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('help-overlay')) {
+                    hideHelp();
+                }
+            });
+
+            document.getElementById('game-over-overlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('game-over-overlay')) {
+                    hideGameOver();
+                }
+            });
+        });
+
+        // 处理音频上下文激活
+        document.addEventListener('touchstart', () => {
+            if (game.audioContext && game.audioContext.state === 'suspended') {
+                game.audioContext.resume();
+            }
+        }, { once: true });
+
+        document.addEventListener('click', () => {
+            if (game.audioContext && game.audioContext.state === 'suspended') {
+                game.audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
